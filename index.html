@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth Daily — Manage Your Money</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0B0B; --paper:#FAF9F6; --gold:#C9A227; --gold-light:#F2D580; --gold-pale:#FBF3DC;
+    --charcoal:#2A2A28; --muted:#6B6558; --green:#2F6F4F; --green-pale:#E8F1EC;
+    --red:#A83E32; --red-pale:#F6E9E6; --amber:#B8862E; --amber-pale:#FBF0DD; --border:#E4DFD3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--charcoal);font-family:'Inter',sans-serif;line-height:1.6;}
+  h1,h2,h3,.display{font-family:'Fraunces',serif;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 24px;}
+
+  header{background:var(--ink);color:var(--paper);padding:24px 0 0 0;}
+  .brandbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .badge{width:40px;height:40px;border-radius:8px;background:var(--gold-light);display:flex;align-items:end;padding:5px;gap:2px;flex-shrink:0;}
+  .badge span{display:block;width:4px;background:var(--ink);}
+  .badge span:nth-child(1){height:9px;} .badge span:nth-child(2){height:14px;} .badge span:nth-child(3){height:19px;} .badge span:nth-child(4){height:24px;}
+  .brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:19px;letter-spacing:0.3px;}
+  .brand-name .gold{color:var(--gold-light);}
+  .tagline{font-size:11px;color:#B8B2A2;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  .datebadge{font-size:11px;color:#B8B2A2;text-align:right;}
+  .datebadge b{color:var(--gold-light);display:block;font-family:'Fraunces',serif;font-size:13px;font-weight:600;}
+
+  nav{display:flex;gap:2px;overflow-x:auto;}
+  .navbtn{background:transparent;border:none;color:#C9C4B4;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:13px 16px;cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;white-space:nowrap;}
+  .navbtn .num{font-family:'Fraunces',serif;color:var(--gold);font-size:13px;}
+  .navbtn.active{color:var(--paper);border-bottom:2px solid var(--gold);}
+  .navbtn:hover{color:var(--paper);}
+
+  .progressbar{height:3px;background:#2A2A28;}
+  .progressfill{height:100%;background:var(--gold);width:0%;transition:width .4s ease;}
+
+  main{padding:36px 0 70px 0;}
+  section{display:none;}
+  section.active{display:block;}
+
+  .hero{padding:6px 0 28px 0;border-bottom:1px solid var(--border);margin-bottom:28px;}
+  .hero h1{font-size:28px;font-weight:600;margin:0 0 8px 0;color:var(--ink);}
+  .hero p{color:var(--muted);font-size:14.5px;max-width:62ch;margin:0;}
+
+  .lesson{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;background:#fff;overflow:hidden;}
+  .lesson-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;}
+  .lesson-num{font-family:'Fraunces',serif;font-size:13px;color:var(--gold);border:1px solid var(--gold-light);background:var(--gold-pale);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .lesson-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 9px;flex-shrink:0;}
+  .lesson-title{font-weight:600;font-size:14.5px;color:var(--ink);flex:1;}
+  .lesson-check{font-size:11px;color:var(--green);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;opacity:0;transition:opacity .2s;}
+  .lesson.done .lesson-check{opacity:1;}
+  .chev{color:var(--muted);transition:transform .2s;font-size:13px;}
+  .lesson.open .chev{transform:rotate(180deg);}
+  .lesson-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .lesson.open .lesson-body{max-height:420px;}
+  .lesson-body-inner{padding:0 18px 18px 58px;color:var(--muted);font-size:13.5px;}
+  .lesson-body-inner b{color:var(--charcoal);font-weight:600;}
+  .mark-btn{margin-top:8px;font-size:12px;font-weight:600;background:none;border:1px solid var(--border);color:var(--charcoal);padding:6px 12px;border-radius:6px;cursor:pointer;}
+  .mark-btn:hover{border-color:var(--gold);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:6px;}
+  .field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14.5px;font-family:'Inter',sans-serif;background:#fff;}
+  .field input:focus{outline:none;border-color:var(--gold);}
+  .bars{display:flex;flex-direction:column;gap:14px;}
+  .barrow-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;}
+  .barrow-label{font-weight:600;color:var(--ink);}
+  .barrow-value{color:var(--muted);}
+  .bartrack{height:10px;background:var(--border);border-radius:6px;overflow:hidden;}
+  .barfill{height:100%;border-radius:6px;}
+  .fill-needs{background:var(--ink);} .fill-wants{background:var(--gold);} .fill-save{background:var(--green);}
+  .fill-contrib{background:var(--ink);} .fill-growth{background:var(--gold);}
+  .verdict{margin-top:18px;padding:15px 17px;border-radius:8px;font-size:13.5px;}
+  .verdict.good{background:var(--green-pale);color:#1D4A34;}
+  .verdict.warn{background:var(--red-pale);color:#7A2E24;}
+  .verdict.mid{background:var(--amber-pale);color:#7A5A1E;}
+
+  .stat-row{display:flex;gap:14px;margin-top:16px;}
+  .stat{flex:1;border:1px solid var(--border);border-radius:8px;padding:14px;background:#fff;}
+  .stat-num{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--ink);}
+  .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+
+  .qcard{border:1px solid var(--border);border-radius:10px;padding:20px;background:#fff;margin-bottom:16px;}
+  .qtitle{font-weight:600;font-size:14.5px;color:var(--ink);margin-bottom:12px;}
+  .opt{display:block;width:100%;text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;margin-bottom:8px;font-family:'Inter',sans-serif;font-size:13.5px;cursor:pointer;color:var(--charcoal);}
+  .opt:hover{border-color:var(--gold);}
+  .opt.correct{background:var(--green-pale);border-color:var(--green);color:#1D4A34;font-weight:500;}
+  .opt.wrong{background:var(--red-pale);border-color:var(--red);color:#7A2E24;}
+  .opt[disabled]{cursor:default;}
+  .qfeedback{font-size:12.5px;color:var(--muted);margin-top:4px;}
+  .score-panel{border:1px solid var(--gold-light);background:var(--gold-pale);border-radius:10px;padding:22px;text-align:center;}
+  .score-num{font-family:'Fraunces',serif;font-size:42px;font-weight:600;color:var(--ink);}
+  .score-label{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .retake{margin-top:14px;background:var(--ink);color:var(--paper);border:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;}
+
+  .eyebrow{font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px;}
+  h2.section-title{font-size:21px;margin:0 0 6px 0;color:var(--ink);}
+  .section-sub{color:var(--muted);font-size:13.5px;margin-bottom:26px;}
+  .rate-scale{display:flex;height:10px;border-radius:6px;overflow:hidden;margin-top:8px;}
+  .rate-scale div{flex:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brandbar">
+      <div class="brand">
+        <div class="badge"><span></span><span></span><span></span><span></span></div>
+        <div>
+          <div class="brand-name">growth <span class="gold">daily</span></div>
+          <div class="tagline">Financial literacy</div>
+        </div>
+      </div>
+      <div class="datebadge">Today's set<b id="todayDate"></b></div>
+    </div>
+    <nav class="wrap" style="padding:0;">
+      <button class="navbtn active" data-tab="learn"><span class="num">01</span> Learn</button>
+      <button class="navbtn" data-tab="budget"><span class="num">02</span> Budget</button>
+      <button class="navbtn" data-tab="debt"><span class="num">03</span> Debt</button>
+      <button class="navbtn" data-tab="invest"><span class="num">04</span> Invest</button>
+      <button class="navbtn" data-tab="credit"><span class="num">05</span> Credit</button>
+      <button class="navbtn" data-tab="quiz"><span class="num">06</span> Quiz</button>
+    </nav>
+  </div>
+  <div class="progressbar"><div class="progressfill" id="progressfill"></div></div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- LEARN -->
+    <section id="learn" class="active">
+      <div class="hero">
+        <h1>Today's five ideas</h1>
+        <p>A new mix of five lessons rotates in every day, pulled from a growing library covering budgeting, debt, credit, taxes, insurance, and investing. Come back tomorrow for a different set.</p>
+      </div>
+      <div id="lessons"></div>
+    </section>
+
+    <!-- BUDGET -->
+    <section id="budget">
+      <div class="eyebrow">Tool</div>
+      <h2 class="section-title">Where is your money actually going?</h2>
+      <p class="section-sub">Enter your monthly take-home pay and spending, and we'll check it against the 50/30/20 rule: 50% needs, 30% wants, 20% savings and debt payoff.</p>
+      <div class="grid2">
+        <div>
+          <div class="field"><label>Monthly take-home pay</label><input type="number" id="income" value="4000" min="0"></div>
+          <div class="field"><label>Needs — rent, groceries, utilities, transport</label><input type="number" id="needs" value="2200" min="0"></div>
+          <div class="field"><label>Wants — dining out, subscriptions, hobbies</label><input type="number" id="wants" value="1300" min="0"></div>
+          <div class="field"><label>Savings & debt payoff</label><input type="number" id="save" value="500" min="0"></div>
+        </div>
+        <div>
+          <div class="bars" id="bars"></div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEBT -->
+    <section id="debt">
+      <div class="eyebrow">Tool</div>
+      <h2 class="section-title">Snowball or avalanche?</h2>
+      <p class="section-sub">Two proven ways to pay off multiple debts. Add what you owe and we'll show the order to pay them off in, either way.</p>
+      <div id="debtRows"></div>
+      <button class="mark-btn" id="addDebt" style="margin-bottom:24px;">+ Add a debt</button>
+      <div class="grid2">
+        <div>
+          <div class="qtitle" style="margin-bottom:10px;">Snowball — smallest balance first</div>
+          <p class="section-sub" style="margin-bottom:12px;">Builds momentum fast. Best if you need quick wins to stay motivated.</p>
+          <ol id="snowballList" style="font-size:13.5px;color:var(--charcoal);padding-left:20px;"></ol>
+        </div>
+        <div>
+          <div class="qtitle" style="margin-bottom:10px;">Avalanche — highest interest first</div>
+          <p class="section-sub" style="margin-bottom:12px;">Saves the most money overall. Best if you're motivated by the math.</p>
+          <ol id="avalancheList" style="font-size:13.5px;color:var(--charcoal);padding-left:20px;"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVEST -->
+    <section id="invest">
+      <div class="eyebrow">Tool</div>
+      <h2 class="section-title">What time does for your money</h2>
+      <p class="section-sub">Compound growth is the single biggest lever most people underuse. See how contributions compare to growth over time.</p>
+      <div class="grid2">
+        <div>
+          <div class="field"><label>Starting amount</label><input type="number" id="invStart" value="1000" min="0"></div>
+          <div class="field"><label>Monthly contribution</label><input type="number" id="invMonthly" value="200" min="0"></div>
+          <div class="field"><label>Expected annual return (%)</label><input type="number" id="invRate" value="7" min="0" step="0.1"></div>
+          <div class="field"><label>Years invested</label><input type="number" id="invYears" value="30" min="1"></div>
+        </div>
+        <div>
+          <div class="bars" id="investBars"></div>
+          <div class="stat-row">
+            <div class="stat"><div class="stat-num" id="investTotal">$0</div><div class="stat-label">Future value</div></div>
+            <div class="stat"><div class="stat-num" id="investGrowth">$0</div><div class="stat-label">From growth</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREDIT -->
+    <section id="credit">
+      <div class="eyebrow">Tool</div>
+      <h2 class="section-title">How healthy is your credit utilization?</h2>
+      <p class="section-sub">Utilization — the share of your available credit you're using — is one of the biggest factors in your credit score, second only to payment history.</p>
+      <div class="grid2">
+        <div>
+          <div class="field"><label>Total balances owed across cards</label><input type="number" id="crBalance" value="1200" min="0"></div>
+          <div class="field"><label>Total credit limit across cards</label><input type="number" id="crLimit" value="8000" min="1"></div>
+        </div>
+        <div>
+          <div class="stat-row" style="margin-top:0;">
+            <div class="stat" style="flex:1;">
+              <div class="stat-num" id="crPct">0%</div>
+              <div class="stat-label">Utilization</div>
+            </div>
+          </div>
+          <div class="rate-scale">
+            <div style="background:var(--green);"></div>
+            <div style="background:var(--gold);"></div>
+            <div style="background:var(--amber);"></div>
+            <div style="background:var(--red);"></div>
+          </div>
+          <div class="verdict" id="crVerdict" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz">
+      <div class="eyebrow">Check yourself</div>
+      <h2 class="section-title">Today's six questions</h2>
+      <p class="section-sub">A different set of six questions each day, drawn from everything in the library.</p>
+      <div id="quizBody"></div>
+      <div id="quizResult" style="display:none;" class="score-panel">
+        <div class="score-num" id="scoreNum">0/6</div>
+        <div class="score-label">correct</div>
+        <button class="retake" id="retakeBtn">Retake today's quiz</button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+// ---------- daily rotation ----------
+function dayIndex(){ return Math.floor(Date.now()/86400000); }
+function getDaily(arr, count, seedOffset){
+  const start = (dayIndex()*7 + seedOffset) % arr.length;
+  const out = [];
+  for(let i=0;i<count;i++) out.push(arr[(start+i)%arr.length]);
+  return out;
+}
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+
+// ---------- state ----------
+const state = { lessonsDone: new Set(), quizDone: false, lessonCount: 5 };
+function updateProgress(){
+  const total = state.lessonCount + 1;
+  const done = state.lessonsDone.size + (state.quizDone ? 1 : 0);
+  document.getElementById('progressfill').style.width = (done/total*100) + '%';
+}
+
+// ---------- tabs ----------
+document.querySelectorAll('.navbtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- lesson pool ----------
+const lessonPool = [
+  {tag:"Saving", title:"Pay yourself first", body:"Before spending on anything else, move a fixed amount into savings the moment you get paid. Even 5-10% of your income, moved automatically, beats trying to save whatever is left over — because there's usually nothing left over."},
+  {tag:"Budgeting", title:"The 50/30/20 rule", body:"A simple starting split for take-home pay: <b>50%</b> to needs (rent, food, utilities), <b>30%</b> to wants (dining, entertainment), <b>20%</b> to savings and debt payoff. It's a guideline, not a law — adjust it to your city and stage of life."},
+  {tag:"Saving", title:"Build a starter emergency fund", body:"Before aggressively investing or paying extra debt, save one month of essential expenses in a separate account. This is what stops a car repair or medical bill from becoming new credit card debt."},
+  {tag:"Investing", title:"Compound interest works both ways", body:"Money you invest grows on itself — $200/month at 7% for 30 years becomes roughly $245,000, mostly from growth, not deposits. Debt compounds the same way in reverse, which is why high-interest debt is worth clearing fast."},
+  {tag:"Budgeting", title:"Track spending for one month", body:"You can't fix a budget you can't see. Write down every expense for 30 days, even small ones. Most people find one or two categories — subscriptions, takeout — are quietly larger than they assumed."},
+  {tag:"Debt", title:"Snowball vs avalanche", body:"<b>Snowball</b> pays the smallest balance first for quick motivation. <b>Avalanche</b> pays the highest interest rate first to save the most money. Both work — pick the one you'll actually stick with."},
+  {tag:"Credit", title:"What makes up your credit score", body:"Roughly: <b>35%</b> payment history, <b>30%</b> credit utilization, <b>15%</b> length of credit history, <b>10%</b> credit mix, <b>10%</b> new credit inquiries. Paying on time and keeping balances low covers most of it."},
+  {tag:"Credit", title:"Credit utilization matters more than balance size", body:"A $500 balance on a $600 limit (83% utilization) hurts your score more than a $5,000 balance on a $20,000 limit (25%). Lenders read high utilization as risk, regardless of the dollar amount."},
+  {tag:"Taxes", title:"How marginal tax rates actually work", body:"Moving into a higher tax bracket doesn't tax all your income at the higher rate — only the portion that falls within that bracket. A raise can never shrink your take-home pay because of a 'higher bracket.'"},
+  {tag:"Insurance", title:"Premiums vs deductibles", body:"A <b>premium</b> is what you pay regularly to keep coverage active. A <b>deductible</b> is what you pay out of pocket before insurance kicks in on a claim. Lower premiums usually mean higher deductibles, and vice versa."},
+  {tag:"Retirement", title:"Never leave a 401(k) match on the table", body:"If your employer matches contributions up to a percentage of your salary, that match is an instant, guaranteed return — often 50-100%. Contribute at least enough to capture the full match before anything else."},
+  {tag:"Retirement", title:"Traditional vs Roth IRA", body:"A <b>traditional IRA</b> gives you a tax break now and you pay taxes when you withdraw in retirement. A <b>Roth IRA</b> is funded with after-tax money, and withdrawals in retirement are tax-free. Roth tends to favor people who expect to be in a similar or higher bracket later."},
+  {tag:"Investing", title:"Diversification and index funds", body:"Instead of picking individual stocks, an index fund holds a broad basket of them, spreading out risk. Diversification doesn't guarantee gains, but it protects you from any single company's bad year wiping out your savings."},
+  {tag:"Budgeting", title:"Inflation quietly shrinks cash", body:"Money sitting in a low-interest account loses purchasing power over time as prices rise. This is why long-term savings goals usually need to be invested somewhere that outpaces inflation, not just parked in cash."},
+  {tag:"Saving", title:"Net worth is the real scoreboard", body:"Net worth = what you own minus what you owe. Tracking it once a month, even roughly, shows whether you're actually making progress — a rising net worth matters more than any single account balance."},
+  {tag:"Budgeting", title:"Watch for lifestyle inflation", body:"As income rises, spending often rises to match it, leaving savings flat despite raises. Try to bank a meaningful chunk of every raise or bonus before your everyday spending adjusts to the new normal."},
+];
+
+const lessonsEl = document.getElementById('lessons');
+function renderLessons(){
+  const todays = getDaily(lessonPool, 5, 0);
+  state.lessonCount = todays.length;
+  lessonsEl.innerHTML = '';
+  todays.forEach((l,i)=>{
+    const div = document.createElement('div');
+    div.className = 'lesson';
+    div.innerHTML = `
+      <div class="lesson-head">
+        <div class="lesson-num">${i+1}</div>
+        <div class="lesson-title">${l.title}</div>
+        <div class="lesson-tag">${l.tag}</div>
+        <div class="lesson-check">done</div>
+        <div class="chev">&#9662;</div>
+      </div>
+      <div class="lesson-body"><div class="lesson-body-inner">
+        <p style="margin-top:0;">${l.body}</p>
+        <button class="mark-btn" data-i="${i}">Mark as done</button>
+      </div></div>
+    `;
+    lessonsEl.appendChild(div);
+    div.querySelector('.lesson-head').addEventListener('click', ()=> div.classList.toggle('open'));
+    div.querySelector('.mark-btn').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      div.classList.add('done');
+      state.lessonsDone.add(i);
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+renderLessons();
+
+// ---------- budget tool ----------
+function renderBudget(){
+  const income = parseFloat(document.getElementById('income').value) || 0;
+  const needs = parseFloat(document.getElementById('needs').value) || 0;
+  const wants = parseFloat(document.getElementById('wants').value) || 0;
+  const save = parseFloat(document.getElementById('save').value) || 0;
+  const total = needs + wants + save;
+  const pct = v => income > 0 ? Math.round((v/income)*100) : 0;
+  document.getElementById('bars').innerHTML = `
+    <div><div class="barrow-top"><span class="barrow-label">Needs</span><span class="barrow-value">${pct(needs)}% &middot; target 50%</span></div>
+      <div class="bartrack"><div class="barfill fill-needs" style="width:${Math.min(pct(needs),100)}%"></div></div></div>
+    <div><div class="barrow-top"><span class="barrow-label">Wants</span><span class="barrow-value">${pct(wants)}% &middot; target 30%</span></div>
+      <div class="bartrack"><div class="barfill fill-wants" style="width:${Math.min(pct(wants),100)}%"></div></div></div>
+    <div><div class="barrow-top"><span class="barrow-label">Savings &amp; debt payoff</span><span class="barrow-value">${pct(save)}% &middot; target 20%</span></div>
+      <div class="bartrack"><div class="barfill fill-save" style="width:${Math.min(pct(save),100)}%"></div></div></div>
+  `;
+  const verdict = document.getElementById('verdict');
+  const leftover = income - total;
+  if(income === 0){
+    verdict.className='verdict warn';
+    verdict.textContent = 'Enter your monthly take-home pay to get feedback.';
+  } else if(leftover < 0){
+    verdict.className='verdict warn';
+    verdict.textContent = `You're spending $${Math.abs(leftover).toFixed(0)} more than you bring in each month. Start by trimming wants — that's usually the most flexible category.`;
+  } else if(pct(save) < 15){
+    verdict.className='verdict warn';
+    verdict.textContent = `You're only saving ${pct(save)}% of your income. Try to work toward 20% — even a small automatic transfer on payday helps.`;
+  } else {
+    verdict.className='verdict good';
+    verdict.textContent = `Solid split. You're saving ${pct(save)}% and have $${leftover.toFixed(0)} unassigned this month — a good candidate for extra debt payoff or investing.`;
+  }
+}
+['income','needs','wants','save'].forEach(id=> document.getElementById(id).addEventListener('input', renderBudget));
+renderBudget();
+
+// ---------- debt tool ----------
+let debts = [{name:'Credit card', balance:3200, apr:22}, {name:'Car loan', balance:9500, apr:6}];
+function renderDebts(){
+  const rows = document.getElementById('debtRows');
+  rows.innerHTML = '';
+  debts.forEach((d,i)=>{
+    const row = document.createElement('div');
+    row.className = 'grid2';
+    row.style.marginBottom = '10px';
+    row.style.alignItems = 'end';
+    row.innerHTML = `
+      <div class="field" style="margin-bottom:0;">
+        <label>Debt name</label>
+        <input type="text" data-field="name" data-i="${i}" value="${d.name}">
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="field" style="margin-bottom:0;flex:1;"><label>Balance ($)</label><input type="number" data-field="balance" data-i="${i}" value="${d.balance}"></div>
+        <div class="field" style="margin-bottom:0;flex:1;"><label>APR (%)</label><input type="number" data-field="apr" data-i="${i}" value="${d.apr}"></div>
+      </div>
+    `;
+    rows.appendChild(row);
+  });
+  rows.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{
+      const i = e.target.dataset.i, field = e.target.dataset.field;
+      debts[i][field] = field === 'name' ? e.target.value : parseFloat(e.target.value) || 0;
+      renderOrders();
+    });
+  });
+  renderOrders();
+}
+function renderOrders(){
+  const snowball = [...debts].sort((a,b)=>a.balance-b.balance);
+  const avalanche = [...debts].sort((a,b)=>b.apr-a.apr);
+  document.getElementById('snowballList').innerHTML = snowball.map(d=>`<li>${d.name} &mdash; $${d.balance.toLocaleString()} (${d.apr}% APR)</li>`).join('');
+  document.getElementById('avalancheList').innerHTML = avalanche.map(d=>`<li>${d.name} &mdash; $${d.balance.toLocaleString()} (${d.apr}% APR)</li>`).join('');
+}
+document.getElementById('addDebt').addEventListener('click', ()=>{ debts.push({name:'New debt', balance:1000, apr:10}); renderDebts(); });
+renderDebts();
+
+// ---------- invest tool ----------
+function renderInvest(){
+  const start = parseFloat(document.getElementById('invStart').value) || 0;
+  const monthly = parseFloat(document.getElementById('invMonthly').value) || 0;
+  const rate = (parseFloat(document.getElementById('invRate').value) || 0) / 100;
+  const years = parseFloat(document.getElementById('invYears').value) || 0;
+  const months = years * 12;
+  const monthlyRate = rate / 12;
+  let balance = start;
+  let contributed = start;
+  for(let m=0; m<months; m++){
+    balance = balance * (1 + monthlyRate) + monthly;
+    contributed += monthly;
+  }
+  const growth = Math.max(balance - contributed, 0);
+  document.getElementById('investTotal').textContent = '$' + Math.round(balance).toLocaleString();
+  document.getElementById('investGrowth').textContent = '$' + Math.round(growth).toLocaleString();
+  const contribPct = balance > 0 ? Math.round((contributed/balance)*100) : 0;
+  const growthPct = 100 - contribPct;
+  document.getElementById('investBars').innerHTML = `
+    <div><div class="barrow-top"><span class="barrow-label">Total contributed</span><span class="barrow-value">$${Math.round(contributed).toLocaleString()}</span></div>
+      <div class="bartrack"><div class="barfill fill-contrib" style="width:${contribPct}%"></div></div></div>
+    <div><div class="barrow-top"><span class="barrow-label">Growth from returns</span><span class="barrow-value">$${Math.round(growth).toLocaleString()}</span></div>
+      <div class="bartrack"><div class="barfill fill-growth" style="width:${growthPct}%"></div></div></div>
+  `;
+}
+['invStart','invMonthly','invRate','invYears'].forEach(id=> document.getElementById(id).addEventListener('input', renderInvest));
+renderInvest();
+
+// ---------- credit tool ----------
+function renderCredit(){
+  const balance = parseFloat(document.getElementById('crBalance').value) || 0;
+  const limit = parseFloat(document.getElementById('crLimit').value) || 1;
+  const pct = Math.min(Math.round((balance/limit)*100), 200);
+  document.getElementById('crPct').textContent = pct + '%';
+  const verdict = document.getElementById('crVerdict');
+  if(pct <= 10){
+    verdict.className = 'verdict good';
+    verdict.textContent = `${pct}% utilization is excellent. This is the range most likely to help your credit score.`;
+  } else if(pct <= 30){
+    verdict.className = 'verdict good';
+    verdict.textContent = `${pct}% utilization is generally considered healthy — most guidance suggests staying under 30%.`;
+  } else if(pct <= 50){
+    verdict.className = 'verdict mid';
+    verdict.textContent = `${pct}% utilization is on the higher side. Paying down balances before your statement closes can help.`;
+  } else {
+    verdict.className = 'verdict warn';
+    verdict.textContent = `${pct}% utilization is high enough to noticeably hurt your score. Focus here before opening new credit.`;
+  }
+}
+['crBalance','crLimit'].forEach(id=> document.getElementById(id).addEventListener('input', renderCredit));
+renderCredit();
+
+// ---------- quiz pool ----------
+const quizPool = [
+  {q:"Under the 50/30/20 rule, what share of income goes to savings and debt payoff?", opts:["10%","20%","30%","50%"], a:1},
+  {q:"What's the main purpose of an emergency fund?", opts:["To invest in stocks","To cover unexpected costs without new debt","To pay for vacations","To boost your credit score"], a:1},
+  {q:"Which debt payoff method saves the most money in total interest?", opts:["Snowball (smallest balance first)","Avalanche (highest interest first)","Paying the minimum on all debts","Ignoring the smallest debt"], a:1},
+  {q:"What does 'paying yourself first' mean?", opts:["Buying yourself something nice each payday","Saving before you spend on anything else","Paying your own bills before family bills","Investing only in yourself"], a:1},
+  {q:"Why does high-interest debt matter so much?", opts:["It doesn't, all debt is equal","Interest compounds, so it grows faster over time","Banks report it more often","It only affects your credit score"], a:1},
+  {q:"What's a good first step before investing aggressively?", opts:["Max out a credit card","Build a starter emergency fund","Buy the newest phone","Skip budgeting entirely"], a:1},
+  {q:"What's the single biggest factor in most credit scores?", opts:["Payment history","Number of credit cards","Your income","Your age"], a:0},
+  {q:"A $500 balance on a $600 limit is what utilization?", opts:["About 8%","About 25%","About 50%","About 83%"], a:3},
+  {q:"If you move into a higher tax bracket, what happens to your existing income?", opts:["It's all taxed at the new higher rate","Only the income within the new bracket is taxed at the higher rate","It becomes tax-free","Your take-home pay always drops"], a:1},
+  {q:"What's a deductible in insurance?", opts:["The monthly fee to keep coverage active","What you pay out of pocket before coverage kicks in on a claim","A tax refund related to insurance","The maximum payout ever allowed"], a:1},
+  {q:"If your employer offers a 401(k) match, what should you generally do first?", opts:["Ignore it and invest elsewhere","Contribute at least enough to get the full match","Wait until you're debt-free to contribute anything","Only contribute after age 50"], a:1},
+  {q:"With a Roth IRA, when do you pay taxes?", opts:["Never — Roth accounts are fully tax-exempt from the government","On contributions now, not on qualified withdrawals later","On withdrawals only, contributions are pre-tax","Roth IRAs don't involve taxes at all"], a:1},
+  {q:"What's the main benefit of an index fund?", opts:["Guaranteed high returns","Broad diversification across many companies at once","No investment risk at all","Only available to wealthy investors"], a:1},
+  {q:"What does inflation do to cash sitting in a low-interest account?", opts:["Increases its purchasing power over time","Has no effect on it","Slowly reduces its purchasing power over time","Converts it automatically into investments"], a:2},
+  {q:"How is net worth calculated?", opts:["Monthly income minus monthly expenses","Total assets minus total liabilities","Credit score divided by debt","Savings account balance only"], a:1},
+  {q:"What is lifestyle inflation?", opts:["Prices rising faster than wages","Spending rising to match income as it grows, leaving savings flat","A type of insurance premium increase","A government tax adjustment"], a:1},
+  {q:"Which is generally true about credit utilization and score impact?", opts:["The dollar amount of debt matters more than the percentage used","Lower utilization as a percentage of your limit is generally better for your score","Utilization has no effect on credit score","Only utilization above 100% matters"], a:1},
+  {q:"What's the main appeal of the debt snowball method?", opts:["It always saves the most money in interest","It builds quick psychological wins by clearing small debts first","It requires no monthly payments","It automatically lowers your interest rates"], a:1},
+];
+
+let quizToday = [];
+let current = 0, correct = 0;
+const quizBody = document.getElementById('quizBody');
+
+function startQuiz(){
+  quizToday = getDaily(quizPool, 6, 3);
+  current = 0; correct = 0;
+  document.getElementById('quizResult').style.display='none';
+  quizBody.style.display='block';
+  renderQuestion();
+}
+function renderQuestion(){
+  if(current >= quizToday.length){
+    quizBody.style.display='none';
+    document.getElementById('quizResult').style.display='block';
+    document.getElementById('scoreNum').textContent = `${correct}/${quizToday.length}`;
+    state.quizDone = true;
+    updateProgress();
+    return;
+  }
+  const item = quizToday[current];
+  quizBody.innerHTML = `
+    <div class="qcard">
+      <div class="qtitle">${current+1}. ${item.q}</div>
+      ${item.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}
+      <div class="qfeedback" id="qfeedback"></div>
+    </div>
+  `;
+  quizBody.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const chosen = parseInt(btn.dataset.i);
+      quizBody.querySelectorAll('.opt').forEach(b=>b.disabled = true);
+      if(chosen === item.a){
+        btn.classList.add('correct');
+        correct++;
+        document.getElementById('qfeedback').textContent = 'Correct.';
+      } else {
+        btn.classList.add('wrong');
+        quizBody.querySelectorAll('.opt')[item.a].classList.add('correct');
+        document.getElementById('qfeedback').textContent = 'Not quite — correct answer highlighted above.';
+      }
+      setTimeout(()=>{ current++; renderQuestion(); }, 900);
+    });
+  });
+}
+document.getElementById('retakeBtn').addEventListener('click', startQuiz);
+startQuiz();
+</script>
+</body>
+</html>
